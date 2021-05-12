@@ -89,12 +89,12 @@ RUN sed -i "s/base_path = \/home\/yuqing\/fastdfs/base_path = ${DATA_PATH}/" /et
 && sed -i "s/url_have_group_name = false/url_have_group_name = true/" /etc/fdfs/mod_fastdfs.conf \
 && sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf
 
-ADD ./config/* /usr/local/openresty/nginx/conf/
+ADD config /usr/local/openresty/nginx/conf
 #COPY location.part.conf /usr/local/openresty/nginx/conf/location.part.conf
 #COPY scratch_upload_body.lua /usr/local/openresty/nginx/conf/scratch_upload_body.lua
 #COPY server_image.lua /usr/local/openresty/nginx/conf/server_image.lua
 ADD vhost /usr/local/openresty/nginx/conf/vhost
-ADD ./fastdfs_config/* /etc/fdfs/
+ADD fastdfs_config /etc/fdfs
 #COPY ./fastdfs/client.conf /etc/fdfs/client.conf
 
 RUN ln -s /usr/local/src/fastdfs/init.d/fdfs_trackerd /etc/init.d/fdfs_trackerd \
