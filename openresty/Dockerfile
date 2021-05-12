@@ -6,10 +6,6 @@ FROM ${RESTY_IMAGE_BASE}:${RESTY_IMAGE_TAG}
 ARG RESTY_VERSION="1.19.3.1"
 ARG RESTY_LUAROCKS_VERSION="3.3.1"
 ARG MAGICK_VERSION="1.3.35"
-ARG SERVER_IP="124.71.194.209"
-ARG DATA_PATH="\/www\/dfs"
-ARG MKDIR_DATA_PATH="/www/dfs"
-ENV ENV_DATA_PATH=$MKDIR_DATA_PATH
 
 RUN apt-get update \
 && apt-get -y install \
@@ -66,7 +62,7 @@ RUN cd /tmp \
 && make -j4 \
 && make install
 
-RUN cd ./tmp \
+RUN cd /tmp \
 && wget http://luarocks.github.io/luarocks/releases/luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
 && tar -xzvf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
 && cd luarocks-${RESTY_LUAROCKS_VERSION} \
@@ -83,21 +79,15 @@ RUN cd /tmp \
 && cd GraphicsMagick-${MAGICK_VERSION}/ \
 && ./configure '--with-magick=wand/GraphicsMagickWand-config' '--enable-shared' \
 && make \
-&& make install
-
-RUN sed -i "s/base_path = \/home\/yuqing\/fastdfs/base_path = ${DATA_PATH}/" /etc/fdfs/tracker.conf \
-&& sed -i "s/tracker_server=tracker:22122/tracker_server=${SERVER_IP}:22122/g" /etc/fdfs/mod_fastdfs.conf \
-&& sed -i "s/url_have_group_name = false/url_have_group_name = true/" /etc/fdfs/mod_fastdfs.conf \
-&& sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf \
+&& make install \
 && chmod +x /home/fastdfs.sh
 
+ARG MKDIR_DATA_PATH="/www/dfs"
+ENV ENV_DATA_PATH=$MKDIR_DATA_PATH
+
 ADD config /usr/local/openresty/nginx/conf
-#COPY location.part.conf /usr/local/openresty/nginx/conf/location.part.conf
-#COPY scratch_upload_body.lua /usr/local/openresty/nginx/conf/scratch_upload_body.lua
-#COPY server_image.lua /usr/local/openresty/nginx/conf/server_image.lua
 ADD vhost /usr/local/openresty/nginx/conf/vhost
 ADD fastdfs_config /etc/fdfs
-#COPY ./fastdfs/client.conf /etc/fdfs/client.conf
 
 RUN ln -s /usr/local/src/fastdfs/init.d/fdfs_trackerd /etc/init.d/fdfs_trackerd \
   && ln -s /usr/local/src/fastdfs/init.d/fdfs_storaged /etc/init.d/fdfs_storaged
