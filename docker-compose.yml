@@ -4,7 +4,7 @@ services:
     build:
       context: ./openresty/
     volumes:
-      - /home/dfs:/home/dfs
+      - /var/log/nginx:/var/log/nginx
       - /www:/www
     restart: always
     ports:
