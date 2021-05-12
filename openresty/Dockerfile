@@ -94,7 +94,7 @@ ADD ./config/* /usr/local/openresty/nginx/conf/
 #COPY scratch_upload_body.lua /usr/local/openresty/nginx/conf/scratch_upload_body.lua
 #COPY server_image.lua /usr/local/openresty/nginx/conf/server_image.lua
 ADD vhost /usr/local/openresty/nginx/conf/vhost
-ADD ./fastdfs/* /etc/fdfs/
+ADD ./fastdfs_config/* /etc/fdfs/
 #COPY ./fastdfs/client.conf /etc/fdfs/client.conf
 
 RUN ln -s /usr/local/src/fastdfs/init.d/fdfs_trackerd /etc/init.d/fdfs_trackerd \
