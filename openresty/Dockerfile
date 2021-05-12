@@ -9,6 +9,7 @@ ARG MAGICK_VERSION="1.3.35"
 ARG SERVER_IP="124.71.194.209"
 ARG DATA_PATH="\/www\/dfs"
 ARG MKDIR_DATA_PATH="/www/dfs"
+ENV ENV_DATA_PATH=$MKDIR_DATA_PATH
 
 RUN apt-get update \
 && apt-get -y install \
@@ -36,7 +37,7 @@ RUN apt-get update \
 COPY ./libfastcommon /usr/local/src/libfastcommon
 COPY ./fastdfs /usr/local/src/fastdfs
 COPY ./fastdfs-nginx-module /usr/local/src/fastdfs-nginx-module
-COPY ./fastdfs.sh /www/
+COPY ./fastdfs.sh /home
 
 RUN cd /usr/local/src \
 && cd libfastcommon/ \
@@ -87,7 +88,8 @@ RUN cd /tmp \
 RUN sed -i "s/base_path = \/home\/yuqing\/fastdfs/base_path = ${DATA_PATH}/" /etc/fdfs/tracker.conf \
 && sed -i "s/tracker_server=tracker:22122/tracker_server=${SERVER_IP}:22122/g" /etc/fdfs/mod_fastdfs.conf \
 && sed -i "s/url_have_group_name = false/url_have_group_name = true/" /etc/fdfs/mod_fastdfs.conf \
-&& sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf
+&& sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf \
+&& chmod +x /home/fastdfs.sh
 
 ADD config /usr/local/openresty/nginx/conf
 #COPY location.part.conf /usr/local/openresty/nginx/conf/location.part.conf
@@ -102,6 +104,6 @@ RUN ln -s /usr/local/src/fastdfs/init.d/fdfs_trackerd /etc/init.d/fdfs_trackerd 
 
 EXPOSE 22122 23000 8888 8080 80 443
 
-ENTRYPOINT ["/www/fastdfs.sh", ${MKDIR_DATA_PATH}]
+ENTRYPOINT ./home/fastdfs.sh $ENV_DATA_PATH
 
 STOPSIGNAL SIGQUIT
