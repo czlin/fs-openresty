@@ -5,7 +5,7 @@ services:
       context: ./openresty/
     volumes:
       - /home/dfs:/home/dfs
-      - /www/thumb:/www/thumb
+      - /www:/www
     restart: always
     ports:
       - 80:80

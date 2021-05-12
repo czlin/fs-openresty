@@ -7,7 +7,8 @@ ARG RESTY_VERSION="1.19.3.1"
 ARG RESTY_LUAROCKS_VERSION="3.3.1"
 ARG MAGICK_VERSION="1.3.35"
 ARG SERVER_IP="124.71.194.209"
-ARG DATA_PATH="\/home\/dfs"
+ARG DATA_PATH="\/www\/dfs"
+ARG MKDIR_DATA_PATH="/www/dfs"
 
 RUN apt-get update \
 && apt-get -y install \
@@ -17,15 +18,6 @@ RUN apt-get update \
     make \
     automake \
     autoconf \
- #   build-essential \
-  #  ca-certificates \
-    #gettext-base \
-    #libgd-dev \
-    #libgeoip-dev \
-    #libncurses5-dev \
-    #libperl-dev \
-    #libreadline-dev \
-    #libxslt1-dev \
     libtool \
     pcre2-utils \
     libpcre2-dev \
@@ -44,7 +36,7 @@ RUN apt-get update \
 COPY ./libfastcommon /usr/local/src/libfastcommon
 COPY ./fastdfs /usr/local/src/fastdfs
 COPY ./fastdfs-nginx-module /usr/local/src/fastdfs-nginx-module
-COPY ./fastdfs.sh /home/
+COPY ./fastdfs.sh /www/
 
 RUN cd /usr/local/src \
 && cd libfastcommon/ \
@@ -72,6 +64,7 @@ RUN cd /tmp \
     --add-module=/usr/local/src/fastdfs-nginx-module/src/ \
 && make -j4 \
 && make install
+
 RUN cd ./tmp \
 && wget http://luarocks.github.io/luarocks/releases/luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
 && tar -xzvf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
@@ -79,7 +72,9 @@ RUN cd ./tmp \
 && ./configure --with-lua=/usr/local/openresty/luajit/ \
 && make \
 && make install
+
 RUN luarocks install magick
+
 RUN cd /tmp \
 && wget https://nchc.dl.sourceforge.net/project/graphicsmagick/graphicsmagick/${MAGICK_VERSION}/GraphicsMagick-${MAGICK_VERSION}.tar.lz \
 && lzip -d GraphicsMagick-${MAGICK_VERSION}.tar.lz \
@@ -92,26 +87,21 @@ RUN cd /tmp \
 RUN sed -i "s/base_path = \/home\/yuqing\/fastdfs/base_path = ${DATA_PATH}/" /etc/fdfs/tracker.conf \
 && sed -i "s/tracker_server=tracker:22122/tracker_server=${SERVER_IP}:22122/g" /etc/fdfs/mod_fastdfs.conf \
 && sed -i "s/url_have_group_name = false/url_have_group_name = true/" /etc/fdfs/mod_fastdfs.conf \
-&& sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf \
-&& mkdir -p /home/dfs \
-&& mkdir -p /www/thumb \
-&& chmod 777 -R /www/thumb \
-&& chmod +x /home/fastdfs.sh
+&& sed -i "s/store_path0=\/home\/yuqing\/fastdfs/store_path0=${DATA_PATH}/" /etc/fdfs/mod_fastdfs.conf
 
-COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-COPY location.part.conf /usr/local/openresty/nginx/conf/location.part.conf
-COPY scratch_upload_body.lua /usr/local/openresty/nginx/conf/scratch_upload_body.lua
-COPY server_image.lua /usr/local/openresty/nginx/conf/server_image.lua
+ADD ./config/* /usr/local/openresty/nginx/conf/
+#COPY location.part.conf /usr/local/openresty/nginx/conf/location.part.conf
+#COPY scratch_upload_body.lua /usr/local/openresty/nginx/conf/scratch_upload_body.lua
+#COPY server_image.lua /usr/local/openresty/nginx/conf/server_image.lua
 ADD vhost /usr/local/openresty/nginx/conf/vhost
-COPY storage.conf /etc/fdfs/storage.conf
-COPY client.conf /etc/fdfs/client.conf
-COPY money.png /usr/local/src
+ADD ./fastdfs/* /etc/fdfs/
+#COPY ./fastdfs/client.conf /etc/fdfs/client.conf
 
 RUN ln -s /usr/local/src/fastdfs/init.d/fdfs_trackerd /etc/init.d/fdfs_trackerd \
   && ln -s /usr/local/src/fastdfs/init.d/fdfs_storaged /etc/init.d/fdfs_storaged
 
 EXPOSE 22122 23000 8888 8080 80 443
 
-ENTRYPOINT ["/home/fastdfs.sh"]
+ENTRYPOINT ["/www/fastdfs.sh", ${MKDIR_DATA_PATH}]
 
 STOPSIGNAL SIGQUIT

@@ -7,7 +7,7 @@
 local width, height, path, ext, thumbPath, filename =
   ngx.var.width, ngx.var.height, ngx.var.path, ngx.var.ext, ngx.var.thumb_path, ngx.var.filename
 
-local images_dir = "/home/dfs/data"
+local images_dir = "/www/dfs/data"
 
 local function return_not_found(msg)
   ngx.status = ngx.HTTP_NOT_FOUND

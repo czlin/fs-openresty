@@ -27,7 +27,7 @@ local function save(self, chunk_size, max_line_size)
   local name = ngx.var.filename
   local store_dir = ngx.var.store_dir
 
-  local file, err = io.open(store_dir..name, "a")
+  local file, err = io.open(store_dir..name, "w")
   if nil == file then
       ngx.log(ngx.ERR, "open "..name.." faild,", err)
       return nil, err

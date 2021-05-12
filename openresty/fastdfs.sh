@@ -1,4 +1,13 @@
 #!/bin/bash
+mkdir -p /www/scratch-assets/upload_assets/internalapi/asset/
+mkdir -p /www/scratch-assets/origin_assets/internalapi/asset/
+mkdir -p $1
+mkdir -p /www/thumb
+
+chmod 777 -R /www/thumb
+chmod 777 -R /www/scratch-assets/
+chmod +x /www/fastdfs.sh
+
 echo "/usr/local/lib" >> /etc/ld.so.conf
 /sbin/ldconfig
 ldconfig
