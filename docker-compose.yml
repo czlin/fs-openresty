@@ -1,0 +1,19 @@
+version: '3'
+services:
+  openresty:
+    build:
+      context: ./openresty/
+    volumes:
+      - /home/dfs:/home/dfs
+      - /www/thumb:/www/thumb
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+      - 8888:8888
+      - 22122:22122
+      - 23000:23000
+      - 8080:8080
+    container_name: openresty
+networks:
+  internal:
